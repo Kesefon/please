@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style>
+			@font-face {
+				font-family: "BMmini";
+				src:
+					url("assets/BMmini.ttf");
+			}
+			* {
+				pointer-events: none;
+			}
+			img {
+				image-rendering: pixelated;
+			}
+			.background-element {
+				position: absolute;
+				z-index: -1;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+			}
+			.draggable {
+				pointer-events: auto;
+				position: absolute;
+				z-index: 1;
+			}
+			#passport-name {
+				position: absolute;
+				top: 72px;
+				left: 8px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: smaller;
+			}
+			#passport-dob {
+				position: absolute;
+				top: 91px;
+				left: 69px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: 7px;
+			}
+			#passport-handle {
+				position: absolute;
+				top: 99px;
+				left: 69px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: 7px;
+			}
+			#passport-iss {
+				position: absolute;
+				top: 107px;
+				left: 69px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: 7px;
+			}
+			#passport-exp {
+				position: absolute;
+				top: 115px;
+				left: 69px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: 7px;
+			}
+			#passport-id {
+				position: absolute;
+				top: 137px;
+				left: 8px;
+				font-family: "BMmini";
+				color: #574848;
+				font-size: x-small;
+			}
+		</style>
+		<script>
+			var dragElement;
+			var origX;
+			var origY;
+			function stopDrag() {
+				document.onmousemove = null;
+				document.onmouseup = null;
+				dragElement = null;
+				origX = null;
+				origY = null;
+			}
+			function drag(e) {
+				console.log(e);
+				console.log(dragElement);
+				dragElement.style.left = (origX += e.movementX) + 'px';
+				dragElement.style.top = (origY += e.movementY) + 'px';
+			}
+			function startDrag(e) {
+				console.log(e);
+				if (e.target.className != "draggable") return;
+				e.preventDefault();
+				dragElement = e.target;
+				origX = dragElement.offsetLeft;
+				origY = dragElement.offsetTop;
+				document.onmousemove = drag;
+				document.onmouseup = stopDrag;
+			}
+			document.onmousedown = startDrag;
+		</script>
+	</head>
+	<body>
+		<img class="background-element" src="assets/CheckpointBack.png"></img>
+		<img class="background-element" style="top: 103px;" src="assets/BoothWall.png">
+		<img class="background-element" style="top: 103px;" src="assets/Desk.png">
+		<div id="passport" class="draggable">
+			<img src="assets/PassportInnerArstotzka.png" ></img>
+			<p id="passport-name">hi</p>
+			<p id="passport-dob">1970.06.3</p>
+			<p id="passport-handle">kesefon</p>
+			<p id="passport-iss">froggo.garden</p>
+			<p id="passport-exp">1970.06.3</p>
+			<p id="passport-id">1337-1337</p>
+		</div>
+	</body>
+</html>
