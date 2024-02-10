@@ -28,6 +28,11 @@
 				position: absolute;
 				z-index: 1;
 			}
+			#passport-stamp {
+				position: absolute;
+				top: 24px;
+				left: 30px;
+			}
 			#passport-name {
 				position: absolute;
 				top: 72px;
@@ -117,16 +122,34 @@
 			}
 		</style>
 		<script>
+			//Passport dragging
 			var dragElement;
 
-			function stopDrag() {
+			function stopDrag(e) {
 				document.onmousemove = null;
 				document.onmouseup = null;
 				dragElement = null;
+				if (sessionStorage['stamped'] != 'false' && e.clientX < 178 && 103 < e.clientY < 238) {
+					fetch(localStorage['instance'] + "api/v1/follow_requests/"+sessionStorage['curReqId']+'/'+sessionStorage['stamped'], {
+						method: "POST",
+						"headers": {
+							"Authorization": "Bearer " + localStorage["authToken"],
+						},
+					});
+					document.getElementById('passport').hidden = true;
+					setTimeout(nextPassport,400);
+				}
 			}
 			function drag(e) {
 				dragElement.style.left = (dragElement.offsetLeft + e.movementX) + 'px';
 				dragElement.style.top = (dragElement.offsetTop + e.movementY) + 'px';
+				if (dragElement.offsetLeft > 178) {
+					document.getElementById('passport-open').hidden = false;
+					document.getElementById('passport-closed').hidden = true;
+				} else {
+					document.getElementById('passport-open').hidden = true;
+					document.getElementById('passport-closed').hidden = false;
+				}
 			}
 			function startDrag(e) {
 				if (e.target.className != "draggable") return;
@@ -138,6 +161,7 @@
 			document.onmousedown = startDrag;
 		</script>
 		<script>
+			//Authentication
 			if (localStorage["authCode"] == null) {
 				var instance = prompt("Enter Mastodon instance:");
 				instance = instance.startsWith('http')? instance : 'https://'+instance;
@@ -160,7 +184,10 @@
 				tokenRequestData.append('scope', 'read:follows write:follows')
 				fetch(localStorage['instance'] + 'oauth/token', {method: "POST", body: tokenRequestData}).then(r => r.json()).then(j => {localStorage["authToken"] = j.access_token;});
 			}
-			function fillData() {
+		</script>
+		<script>
+			//Fetch/Render data
+			function nextPassport() {
 				fetch(localStorage['instance'] + "api/v1/follow_requests?limit=1", {
 					"headers": {
 						"Authorization": "Bearer " + localStorage["authToken"],
@@ -178,27 +205,43 @@
 					document.getElementById('passport-id').innerText = j[0].id.substr(0,6).toUpperCase();
 					document.getElementById('passport-pic').src = j[0].avatar;
 					sessionStorage['curReqId'] = j[0].id;
+					sessionStorage['stamped'] = 'false';
+					document.getElementById('passport-stamp').src = 'assets/InkEmpty.png';
+					let passport = document.getElementById('passport');
+					passport.hidden = false;
+					passport.style.top = '140px';
+					passport.style.left = '60px'
 				});
 			}
-			window.onload = fillData
+			window.onload = nextPassport
 
+			function stampOffset(x,y) {
+				let passport = document.getElementById('passport');
+				let offsetX = x - passport.offsetLeft ;
+				let offsetY = y - passport.offsetTop;
+				if (offsetX < 0 || offsetY < 0 || offsetX > 60 || offsetY > 132) return false;
+				let stamp = document.getElementById('passport-stamp');
+				stamp.style.left = offsetX + 'px';
+				stamp.style.top = offsetY + 'px';
+				return true;
+			}
 			function deny() {
-				fetch(localStorage['instance'] + "api/v1/follow_requests/"+sessionStorage['curReqId']+"/reject", {
-					method: "POST",
-					"headers": {
-						"Authorization": "Bearer " + localStorage["authToken"],
-					},
-				});
-				fillData();
+				let stamp = document.getElementById('StampDenied');
+				stamp.style.top = '15px';
+				setTimeout(() => {stamp.style.top = '0px'},400);
+				if (stampOffset(332, 179)) {
+					document.getElementById('passport-stamp').src = 'assets/InkDenied.png';
+					sessionStorage['stamped'] = 'reject';
+				}
 			}
 			function approve() {
-				fetch(localStorage['instance'] + "api/v1/follow_requests/"+sessionStorage['curReqId']+"/authorize", {
-					method: "POST",
-					"headers": {
-						"Authorization": "Bearer " + localStorage["authToken"],
-					},
-				});
-				fillData();
+				let stamp = document.getElementById('StampApproved');
+				stamp.style.top = '15px';
+				setTimeout(() => {stamp.style.top = '0px'},400);
+				if (stampOffset(452,179)) {
+					document.getElementById('passport-stamp').src = 'assets/InkApproved.png';
+					sessionStorage['stamped'] = 'authorize';
+				}
 			}
 		</script>
 	</head>
@@ -209,22 +252,30 @@
 
 		<div class="stamps" id="StampBar">
 			<img class="stamps" id="StampBarTop" src="assets/StampBarTop.png"></img>
-			<img class="stamps" id="StampBotDenied" src="assets/StampBotDenied.png" onclick='deny()'></img>
-			<img class="stamps" id="StampTopDenied" src="assets/StampTop.png"  onclick='deny()'></img>
+			<div class="stamps" id="StampDenied">
+				<img class="stamps" id="StampBotDenied" src="assets/StampBotDenied.png" onclick='deny()'></img>
+				<img class="stamps" id="StampTopDenied" src="assets/StampTop.png"  onclick='deny()'></img>
+			</div>
+			<div class="stamps" id="StampApproved">
 			<img class="stamps" id="StampBotApproved" src="assets/StampBotApproved.png" onclick='approve()'></img>
 			<img class="stamps" id="StampTopApproved" src="assets/StampTop.png" onclick='approve()'></img>
+			</div>
 			<img class="stamps" id="StampBarBot" src="assets/StampBarBot.png"></img>
 		</div>
 
-		<div id="passport" class="draggable">
-			<img src="assets/PassportInnerArstotzka.png" ></img>
-			<p id="passport-name">Loading...</p>
-			<p id="passport-dob">1970.06.3</p>
-			<p id="passport-handle">kesefon</p>
-			<p id="passport-iss">froggo.garden</p>
-			<p id="passport-exp">1970.06.3</p>
-			<p id="passport-id">1337</p>
-			<img id="passport-pic"></img>
+		<div hidden id="passport" class="draggable">
+			<img id="passport-closed" src="assets/PassportOuterArstotzka.png">
+			<div hidden id="passport-open">
+				<img src="assets/PassportInnerArstotzka.png" ></img>
+				<img id="passport-stamp"></img>
+				<p id="passport-name">Loading...</p>
+				<p id="passport-dob">1970.06.3</p>
+				<p id="passport-handle">kesefon</p>
+				<p id="passport-iss">froggo.garden</p>
+				<p id="passport-exp">1970.06.3</p>
+				<p id="passport-id">1337</p>
+				<img id="passport-pic"></img>
+			</div>
 		</div>
 	</body>
 </html>
