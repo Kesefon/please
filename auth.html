@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script>
+      localStorage["authCode"] = new URLSearchParams(window.location.search).get('code');
+      window.location = window.location.origin;
+    </script>
+  </head>
+  <body>
+    <header></header>
+    <main></main>
+    <footer></footer>
+  </body>
+</html>

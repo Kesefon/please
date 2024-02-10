@@ -36,7 +36,7 @@
 				color: #574848;
 				font-size: smaller;
 			}
-			#passport-dob {
+			#passport-handle {
 				position: absolute;
 				top: 91px;
 				left: 69px;
@@ -44,7 +44,7 @@
 				color: #574848;
 				font-size: 7px;
 			}
-			#passport-handle {
+			#passport-dob {
 				position: absolute;
 				top: 99px;
 				left: 69px;
@@ -73,38 +73,79 @@
 				top: 137px;
 				left: 8px;
 				font-family: "BMmini";
-				color: #574848;
+				color: #a29490;
 				font-size: x-small;
+			}
+			#passport-pic {
+				position: absolute;
+				top: 98px;
+				left: 8px;
+				width: 40px;
+				height: 48px;
 			}
 		</style>
 		<script>
 			var dragElement;
-			var origX;
-			var origY;
+
 			function stopDrag() {
 				document.onmousemove = null;
 				document.onmouseup = null;
 				dragElement = null;
-				origX = null;
-				origY = null;
 			}
 			function drag(e) {
-				console.log(e);
-				console.log(dragElement);
-				dragElement.style.left = (origX += e.movementX) + 'px';
-				dragElement.style.top = (origY += e.movementY) + 'px';
+				dragElement.style.left = (dragElement.offsetLeft + e.movementX) + 'px';
+				dragElement.style.top = (dragElement.offsetTop + e.movementY) + 'px';
 			}
 			function startDrag(e) {
-				console.log(e);
 				if (e.target.className != "draggable") return;
 				e.preventDefault();
 				dragElement = e.target;
-				origX = dragElement.offsetLeft;
-				origY = dragElement.offsetTop;
 				document.onmousemove = drag;
 				document.onmouseup = stopDrag;
 			}
 			document.onmousedown = startDrag;
+		</script>
+		<script>
+			if (localStorage["authCode"] == null) {
+				var instance = prompt("Enter Mastodon instance:");
+				instance = instance.startsWith('http')? instance : 'https://'+instance;
+				localStorage['instance'] = new URL(instance);
+				let appRegisterData = new FormData();
+				appRegisterData.append("client_name", "Followers Please");
+				appRegisterData.append("redirect_uris", 'https://please.try.waterboard.ing/auth.html');
+				appRegisterData.append("scopes", "read:follows write:follows");
+				appRegisterData.append("website", "please.try.waterboard.ing");
+				fetch(localStorage['instance'] + 'api/v1/apps', {method: "POST", body: appRegisterData}).then(r => r.json()).then(j => {localStorage["clientId"] = j.client_id; localStorage["clientSecret"] = j.client_secret});
+				window.location = localStorage['instance'] + 'oauth/authorize?response_type=code&client_id=' + localStorage["clientId"] + '&redirect_uri=https://please.try.waterboard.ing/auth.html&scope=read:follows+write:follows';
+			}
+			if (localStorage["authToken"] == null) {
+				let tokenRequestData = new FormData();
+				tokenRequestData.append('grant_type', 'authorization_code')
+				tokenRequestData.append('code', localStorage["authCode"])
+				tokenRequestData.append('client_id', localStorage['clientId'])
+				tokenRequestData.append('client_secret', localStorage['clientSecret'])
+				tokenRequestData.append('redirect_uri', 'https://please.try.waterboard.ing/auth.html')
+				tokenRequestData.append('scope', 'read:follows write:follows')
+				fetch(localStorage['instance'] + 'oauth/token', {method: "POST", body: tokenRequestData}).then(r => r.json()).then(j => {localStorage["authToken"] = j.access_token;});
+			}
+			function fillData() {
+				fetch(localStorage['instance'] + "api/v1/follow_requests?limit=1", {
+					"headers": {
+						"Authorization": "Bearer " + localStorage["authToken"],
+					},
+				}).then(r => r.json()).then(j => {
+					if (j.length == 0) alert("No follow requests");
+					document.getElementById('passport-name').innerText = j[0].display_name;
+					document.getElementById('passport-dob').innerText = new Date(j[0].created_at).toISOString().split('T')[0];
+					document.getElementById('passport-handle').innerText = j[0].acct;
+					document.getElementById('passport-iss').innerText = j[0].fqn.split('@')[1];
+					document.getElementById('passport-exp').innerText = new Date(Date.now()+Math.random()*100000000000).toISOString().split('T')[0];
+					document.getElementById('passport-id').innerText = j[0].id.substr(0,6).toUpperCase();
+					document.getElementById('passport-pic').src = j[0].avatar;
+					sessionStorage['curReqId'] = j[0].id;
+				});
+			}
+			window.onload = fillData
 		</script>
 	</head>
 	<body>
@@ -113,12 +154,13 @@
 		<img class="background-element" style="top: 103px;" src="assets/Desk.png">
 		<div id="passport" class="draggable">
 			<img src="assets/PassportInnerArstotzka.png" ></img>
-			<p id="passport-name">hi</p>
+			<p id="passport-name">Loading...</p>
 			<p id="passport-dob">1970.06.3</p>
 			<p id="passport-handle">kesefon</p>
 			<p id="passport-iss">froggo.garden</p>
 			<p id="passport-exp">1970.06.3</p>
-			<p id="passport-id">1337-1337</p>
+			<p id="passport-id">1337</p>
+			<img id="passport-pic"></img>
 		</div>
 	</body>
 </html>
