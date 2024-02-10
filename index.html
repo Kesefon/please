@@ -83,6 +83,38 @@
 				width: 40px;
 				height: 48px;
 			}
+
+			.stamps {
+				position: absolute;
+				z-index: 2;
+			}
+			#StampBar {
+				top: 130px;
+				left: 290px;
+			}
+			#StampTopDenied {
+				pointer-events: auto;
+				top: -20px;
+				left: 64px;
+			}
+			#StampBotDenied {
+				pointer-events: auto;
+				top: 1px;
+				left: 40px;
+			}
+			#StampTopApproved {
+				pointer-events: auto;
+				top: -20px;
+				left: 184px;
+			}
+			#StampBotApproved {
+				pointer-events: auto;
+				top: 1px;
+				left: 160px;
+			}
+			#StampBarBot {
+				top: 47px;
+			}
 		</style>
 		<script>
 			var dragElement;
@@ -134,7 +166,10 @@
 						"Authorization": "Bearer " + localStorage["authToken"],
 					},
 				}).then(r => r.json()).then(j => {
-					if (j.length == 0) alert("No follow requests");
+					if (j.length == 0) {
+						alert("No follow requests");
+						return;
+					}
 					document.getElementById('passport-name').innerText = j[0].display_name;
 					document.getElementById('passport-dob').innerText = new Date(j[0].created_at).toISOString().split('T')[0];
 					document.getElementById('passport-handle').innerText = j[0].acct;
@@ -146,12 +181,41 @@
 				});
 			}
 			window.onload = fillData
+
+			function deny() {
+				fetch(localStorage['instance'] + "api/v1/follow_requests/"+sessionStorage['curReqId']+"/reject", {
+					method: "POST",
+					"headers": {
+						"Authorization": "Bearer " + localStorage["authToken"],
+					},
+				});
+				fillData();
+			}
+			function approve() {
+				fetch(localStorage['instance'] + "api/v1/follow_requests/"+sessionStorage['curReqId']+"/authorize", {
+					method: "POST",
+					"headers": {
+						"Authorization": "Bearer " + localStorage["authToken"],
+					},
+				});
+				fillData();
+			}
 		</script>
 	</head>
 	<body>
 		<img class="background-element" src="assets/CheckpointBack.png"></img>
 		<img class="background-element" style="top: 103px;" src="assets/BoothWall.png">
 		<img class="background-element" style="top: 103px;" src="assets/Desk.png">
+
+		<div class="stamps" id="StampBar">
+			<img class="stamps" id="StampBarTop" src="assets/StampBarTop.png"></img>
+			<img class="stamps" id="StampBotDenied" src="assets/StampBotDenied.png" onclick='deny()'></img>
+			<img class="stamps" id="StampTopDenied" src="assets/StampTop.png"  onclick='deny()'></img>
+			<img class="stamps" id="StampBotApproved" src="assets/StampBotApproved.png" onclick='approve()'></img>
+			<img class="stamps" id="StampTopApproved" src="assets/StampTop.png" onclick='approve()'></img>
+			<img class="stamps" id="StampBarBot" src="assets/StampBarBot.png"></img>
+		</div>
+
 		<div id="passport" class="draggable">
 			<img src="assets/PassportInnerArstotzka.png" ></img>
 			<p id="passport-name">Loading...</p>
