@@ -185,18 +185,23 @@
 				tokenRequestData.append('client_secret', localStorage['clientSecret'])
 				tokenRequestData.append('redirect_uri', 'https://please.try.waterboard.ing/auth.html')
 				tokenRequestData.append('scope', 'read:follows write:follows')
-				fetch(localStorage['instance'] + 'oauth/token', {method: "POST", body: tokenRequestData}).then(r => r.json()).then(j => {localStorage["authToken"] = j.access_token;});
+				fetch(localStorage['instance'] + 'oauth/token', {method: "POST", body: tokenRequestData}).then(r => r.json()).then(j => {
+					localStorage["authToken"] = j.access_token;
+					nextPassport();
+				});
 			}
 		</script>
 		<script>
 			//Fetch/Render data
 			function nextPassport() {
+				if (localStorage["authToken"] == null || localStorage["authToken"] == 'undefined') return;
+				
 				fetch(localStorage['instance'] + "api/v1/follow_requests?limit=1", {
 					"headers": {
 						"Authorization": "Bearer " + localStorage["authToken"],
 					},
 				}).then(r => r.json()).then(j => {
-					if (j.length == 0) {
+					if (j.length != 1) {
 						alert("No follow requests");
 						return;
 					}
