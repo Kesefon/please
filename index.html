@@ -162,7 +162,7 @@
 		</script>
 		<script>
 			//Authentication
-			if (localStorage["authCode"] == null) {
+			if (localStorage["authCode"] == null || localStorage["authCode"] == 'undefined') {
 				var instance = prompt("Enter Mastodon instance:");
 				instance = instance.startsWith('http')? instance : 'https://'+instance;
 				localStorage['instance'] = new URL(instance);
@@ -174,7 +174,7 @@
 				fetch(localStorage['instance'] + 'api/v1/apps', {method: "POST", body: appRegisterData}).then(r => r.json()).then(j => {localStorage["clientId"] = j.client_id; localStorage["clientSecret"] = j.client_secret});
 				window.location = localStorage['instance'] + 'oauth/authorize?response_type=code&client_id=' + localStorage["clientId"] + '&redirect_uri=https://please.try.waterboard.ing/auth.html&scope=read:follows+write:follows';
 			}
-			if (localStorage["authToken"] == null) {
+			if (localStorage["authToken"] == null || localStorage["authToken"] == 'undefined') {
 				let tokenRequestData = new FormData();
 				tokenRequestData.append('grant_type', 'authorization_code')
 				tokenRequestData.append('code', localStorage["authCode"])
