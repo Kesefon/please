@@ -217,7 +217,7 @@
 
 			function stampOffset(x,y) {
 				let passport = document.getElementById('passport');
-				let offsetX = x - passport.offsetLeft ;
+				let offsetX = x - passport.offsetLeft;
 				let offsetY = y - passport.offsetTop;
 				if (offsetX < 0 || offsetY < 0 || offsetX > 60 || offsetY > 132) return false;
 				let stamp = document.getElementById('passport-stamp');
@@ -257,8 +257,8 @@
 				<img class="stamps" id="StampTopDenied" src="assets/StampTop.png"  onclick='deny()'></img>
 			</div>
 			<div class="stamps" id="StampApproved">
-			<img class="stamps" id="StampBotApproved" src="assets/StampBotApproved.png" onclick='approve()'></img>
-			<img class="stamps" id="StampTopApproved" src="assets/StampTop.png" onclick='approve()'></img>
+				<img class="stamps" id="StampBotApproved" src="assets/StampBotApproved.png" onclick='approve()'></img>
+				<img class="stamps" id="StampTopApproved" src="assets/StampTop.png" onclick='approve()'></img>
 			</div>
 			<img class="stamps" id="StampBarBot" src="assets/StampBarBot.png"></img>
 		</div>
