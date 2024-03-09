@@ -211,7 +211,10 @@
 					document.getElementById('passport-name').innerText = j[0].display_name;
 					document.getElementById('passport-dob').innerText = new Date(j[0].created_at).toISOString().split('T')[0];
 					document.getElementById('passport-handle').innerText = j[0].acct;
-					document.getElementById('passport-iss').innerText = j[0].fqn.split('@')[1];
+                    //Misskey uses fqn and Mastodon uses acct
+                    //Who needs compatible apis anyways?
+                    let issuer = j[0].fqn? j[0].fqn.split('@')[1]:j[0].acct.split('@')[1];
+					document.getElementById('passport-iss').innerText = issuer;
 					document.getElementById('passport-exp').innerText = new Date(Date.now()+Math.random()*100000000000).toISOString().split('T')[0];
 					document.getElementById('passport-id').innerText = j[0].id.substr(0,6).toUpperCase();
 					document.getElementById('passport-pic').src = j[0].avatar;
