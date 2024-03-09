@@ -173,7 +173,7 @@
 				appRegisterData.append("client_name", "Followers Please");
 				appRegisterData.append("redirect_uris", 'https://please.try.waterboard.ing/auth.html');
 				appRegisterData.append("scopes", "read:follows write:follows");
-				appRegisterData.append("website", "please.try.waterboard.ing");
+				appRegisterData.append("website", "https://please.try.waterboard.ing");
 				fetch(localStorage['instance'] + 'api/v1/apps', {method: "POST", body: appRegisterData}).then(r => r.json()).then(j => {
 					localStorage["clientId"] = j.client_id;
 					localStorage["clientSecret"] = j.client_secret;
