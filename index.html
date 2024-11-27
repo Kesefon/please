@@ -205,25 +205,20 @@
 					});
 			}
 			if ((localStorage["authToken"] == null || localStorage["authToken"] == 'undefined') && !(localStorage["authCode"] == null || localStorage["authCode"] == 'undefined')) {
-				let tokenRequestData = {
-					'grant_type': 'authorization_code',
-					'code': localStorage["authCode"],
-					'client_id': localStorage['clientId'],
-					'client_secret': localStorage['clientSecret'],
-					'redirect_uri': 'https://please.try.waterboard.ing/auth.html',
-					'scope': 'read:follows write:follows'
-				}
-				console.log('login');
+				let tokenRequestData = new FormData();
+				tokenRequestData.append('grant_type', 'authorization_code')
+				tokenRequestData.append('code', localStorage["authCode"])
+				tokenRequestData.append('client_id', localStorage['clientId'])
+				tokenRequestData.append('client_secret', localStorage['clientSecret'])
+				tokenRequestData.append('redirect_uri', 'https://please.try.waterboard.ing/auth.html')
+				tokenRequestData.append('scope', 'read:follows write:follows')
 				fetch(localStorage['instance'] + 'oauth/token', {
 						method: "POST",
-						headers: {
-							'Accept': 'application/json'
-						},
-						body: JSON.stringify(tokenRequestData)
+						body: tokenRequestData
 					}).then(r => r.json(), () => {
 						alert('Something went wrong while trying to obtain an access token!');
 					}).then(j => {
-						if (!j.client_id) {
+						if (!j.access_token) {
 							alert('Something went wrong while trying to obtain an access token!');
 						}
 						localStorage["authToken"] = j.access_token;
