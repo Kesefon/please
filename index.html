@@ -205,7 +205,7 @@
 					});
 			}
 			if ((localStorage["authToken"] == null || localStorage["authToken"] == 'undefined') && !(localStorage["authCode"] == null || localStorage["authCode"] == 'undefined')) {
-				let tokenRequestData = new FormData();
+				let tokenRequestData = new URLSearchParams();
 				tokenRequestData.append('grant_type', 'authorization_code')
 				tokenRequestData.append('code', localStorage["authCode"])
 				tokenRequestData.append('client_id', localStorage['clientId'])
